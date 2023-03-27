@@ -63,14 +63,14 @@ class _HomePagesState extends State<HomePages> {
               ),
               ElevatedButton(
                   onPressed: () async {
-                    if (_ageController.text != null) {
-                      await _user.doc(documentSnapshot!.id).update({
-                        'nama': _nameController.text,
-                        'age': _ageController.text
-                      });
-                      _nameController.text = '';
-                      _ageController.text = '';
-                    }
+                    await _user.doc(documentSnapshot!.id).update({
+                      'nama': _nameController.text,
+                      'age': _ageController.text
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        duration: Duration(milliseconds: 500),
+                        content: Text('Berhasil di update')));
+
                     Navigator.pop(context);
                   },
                   child: Text('Update'))
@@ -118,15 +118,22 @@ class _HomePagesState extends State<HomePages> {
               ),
               ElevatedButton(
                   onPressed: () async {
-                    if (_ageController.text != null) {
+                    if (_nameController.text.isNotEmpty &&
+                        _ageController.text.isNotEmpty) {
                       await _user.add({
                         'nama': _nameController.text,
                         'age': _ageController.text
                       });
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                          duration: Duration(milliseconds: 500),
+                          content: Text(
+                              '${_nameController.text} berhasil ditambahkan')));
+
                       _nameController.text = '';
                       _ageController.text = '';
+
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
                   },
                   child: Text('Create'))
             ],
@@ -139,8 +146,9 @@ class _HomePagesState extends State<HomePages> {
   //delete
   _delete(String userId) async {
     await _user.doc(userId).delete();
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('User successfully deleted ')));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: Duration(milliseconds: 500),
+        content: Text('User successfully deleted ')));
   }
 
   @override
@@ -156,7 +164,7 @@ class _HomePagesState extends State<HomePages> {
             centerTitle: true,
           ),
           body: StreamBuilder(
-            stream: _user.snapshots(),
+            stream: _user.orderBy('age').snapshots(),
             builder: (context, streamSnapshot) {
               if (streamSnapshot.hasData) {
                 return ListView.builder(
